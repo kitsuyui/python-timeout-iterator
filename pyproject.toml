@@ -1,0 +1,49 @@
+[tool.poetry]
+# I use poetry as just a package manager.
+# So, I only write the settings that poetry needs.
+# The actual package metadata is written in setup.cfg.
+# I use pypa/build for packaging.
+name = "timeout-iterator"
+version = "0.0.0"
+description = ""
+authors = []
+packages = [{ include = "timeout_iterator" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "*"
+pytest = "*"
+pytest-cov = "*"
+poethepoet = "*"
+setuptools-scm = "*"
+build = "*"
+
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "timeout_iterator/_version.py"
+
+[tool.poe.tasks]
+test = "pytest"
+coverage-xml = "pytest --cov=timeout_iterator --doctest-modules --cov-report=xml"
+format = "ruff format timeout_iterator tests"
+check = "ruff check timeout_iterator tests"
+build = "python -m build"
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = false
+
+[tool.mypy-tests."*"]
+disallow_untyped_defs = false
+warn_return_any = false
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 79
