@@ -2,7 +2,9 @@ from collections.abc import Iterable
 import datetime
 
 
-def without_terminate(iterable: Iterable, seconds: float | int) -> Iterable:
+# NOTE: float type accepts int
+# https://peps.python.org/pep-0484/#the-numeric-tower
+def without_terminate(iterable: Iterable, seconds: float) -> Iterable:
     """Timeout iterator
 
     This iterator times out after the specified number of seconds.

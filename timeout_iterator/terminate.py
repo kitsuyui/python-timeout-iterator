@@ -3,7 +3,9 @@ import datetime
 import signal
 
 
-def terminate(iterable: Iterable, seconds: float | int) -> Iterable:
+# NOTE: float type accepts int
+# https://peps.python.org/pep-0484/#the-numeric-tower
+def terminate(iterable: Iterable, seconds: float) -> Iterable:
     """Timeout iterator
 
     This iterator forcibly terminates a running task after the specified number of seconds.
