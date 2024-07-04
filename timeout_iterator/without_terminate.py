@@ -1,10 +1,13 @@
-from collections.abc import Iterable
+from typing import TypeVar, Iterable
 import datetime
+
+
+T = TypeVar("T")
 
 
 # NOTE: float type accepts int
 # https://peps.python.org/pep-0484/#the-numeric-tower
-def without_terminate(iterable: Iterable, seconds: float) -> Iterable:
+def without_terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
     """Timeout iterator
 
     This iterator times out after the specified number of seconds.
