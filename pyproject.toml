@@ -19,6 +19,7 @@ pytest-cov = "*"
 poethepoet = "*"
 setuptools-scm = "*"
 build = "*"
+mypy = "*"
 
 [build-system]
 requires = ["setuptools", "setuptools_scm"]
@@ -31,19 +32,15 @@ write_to = "timeout_iterator/_version.py"
 test = "pytest"
 coverage-xml = "pytest --cov=timeout_iterator --doctest-modules --cov-report=xml"
 format = "ruff format timeout_iterator tests"
-check = "ruff check timeout_iterator tests"
+check = [
+    { cmd = "ruff check timeout_iterator tests" },
+    { cmd = "mypy timeout_iterator tests" },
+]
 build = "python -m build"
 
 [tool.mypy]
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
+strict = true
 ignore_missing_imports = false
-
-[tool.mypy-tests."*"]
-disallow_untyped_defs = false
-warn_return_any = false
-ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 79
