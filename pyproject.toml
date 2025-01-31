@@ -1,25 +1,42 @@
-[tool.poetry]
-# I use poetry as just a package manager.
-# So, I only write the settings that poetry needs.
-# The actual package metadata is written in setup.cfg.
-# I use pypa/build for packaging.
+[project]
 name = "timeout-iterator"
-version = "0.0.0"
-description = ""
-authors = []
-packages = [{ include = "timeout_iterator" }]
+dynamic = ["version"]
+requires-python = ">=3.9"
+dependencies = []
+description = "Iterator with timeout"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = { file = "LICENSE" }
+authors = [
+    {name = "Yui KITSU", email = "kitsuyui+github@kitsuyui.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
+[project.urls]
+Homepage = "https://github.com/kitsuyui/python-timeout-iterator"
 
-[tool.poetry.group.dev.dependencies]
-ruff = "*"
-pytest = "*"
-pytest-cov = "*"
-poethepoet = "*"
-setuptools-scm = "*"
-build = "*"
-mypy = "*"
+[tool.setuptools]
+package-data = { "timeout_iterator" = ["py.typed"], "*" = ["README.md, LICENSE"] }
+package-dir = { "timeout_iterator" = "timeout_iterator" }
+
+[tool.uv]
+dev-dependencies = [
+    "pytest",
+    "pytest-cov",
+    "poethepoet",
+    "setuptools-scm",
+    "ruff",
+    "mypy",
+]
 
 [build-system]
 requires = ["setuptools", "setuptools_scm"]
@@ -27,6 +44,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "timeout_iterator/_version.py"
+version_scheme = "only-version"
+local_scheme = "no-local-version"
 
 [tool.poe.tasks]
 test = "pytest"
