@@ -69,3 +69,37 @@ ignore_missing_imports = false
 
 [tool.ruff]
 line-length = 79
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "ANN",
+    "ARG",
+    "B",
+    "C4",
+    "C90",
+    "COM",
+    "E",
+    "F",
+    "I",
+    "PERF",
+    "PLE",
+    "PTH",
+    "RET",
+    "RUF",
+    "S",
+    "SIM",
+    "SLOT",
+    "UP",
+    "W",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"timeout_iterator/_version.py" = [
+    "RUF022",
+]
+"tests/**/*.py" = [
+    "ANN",
+    "D",
+    "S101",
+]
