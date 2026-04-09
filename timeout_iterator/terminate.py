@@ -1,7 +1,7 @@
-from typing import TypeVar, Iterable
 import datetime
 import signal
-
+from collections.abc import Iterable
+from typing import TypeVar
 
 T = TypeVar("T")
 
@@ -11,12 +11,12 @@ T = TypeVar("T")
 def terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
     """Timeout iterator
 
-    This iterator forcibly terminates a running task after the specified number of seconds.
+    This iterator forcibly terminates a task after the timeout expires.
     """
     now = datetime.datetime.now()
     end = now + datetime.timedelta(seconds=seconds)
 
-    def handler(signum: int, frame: object) -> None:
+    def handler(signum: int, _frame: object) -> None:
         if signum != signal.SIGALRM:
             return
         if datetime.datetime.now() < end:
@@ -27,7 +27,6 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
     signal.setitimer(signal.ITIMER_REAL, seconds)
 
     try:
-        for item in iterable:
-            yield item
+        yield from iterable
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)

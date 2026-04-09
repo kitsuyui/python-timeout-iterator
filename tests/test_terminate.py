@@ -7,7 +7,7 @@ from timeout_iterator import terminate
 
 
 def test_terminate() -> None:
-    # If the time is shorter than the timeout, it will time out with a TimeoutError.
+    # A short timeout raises TimeoutError before the loop finishes.
     results = []
     with pytest.raises(TimeoutError):
         for i in terminate(range(10), seconds=0.3):
