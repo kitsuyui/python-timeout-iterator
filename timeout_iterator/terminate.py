@@ -17,9 +17,7 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
     end = now + datetime.timedelta(seconds=seconds)
 
     def handler(signum: int, _frame: object) -> None:
-        if signum != signal.SIGALRM:
-            return
-        if datetime.datetime.now() < end:
+        if signum != signal.SIGALRM or datetime.datetime.now() < end:
             return
         raise TimeoutError
 
