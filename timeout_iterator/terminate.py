@@ -21,10 +21,11 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
             return
         raise TimeoutError
 
-    signal.signal(signal.SIGALRM, handler)
+    original_handler = signal.signal(signal.SIGALRM, handler)
     signal.setitimer(signal.ITIMER_REAL, seconds)
 
     try:
         yield from iterable
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, original_handler)
