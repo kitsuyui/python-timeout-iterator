@@ -47,3 +47,17 @@ def test_terminate_4() -> None:
         signal.alarm(signal.SIGALRM)
 
     assert results == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+def test_terminate_restores_sigalrm_handler() -> None:
+    def handler(signum: int, _frame: object) -> None:
+        raise AssertionError(f"unexpected signal: {signum}")
+
+    original_handler = signal.getsignal(signal.SIGALRM)
+    signal.signal(signal.SIGALRM, handler)
+    try:
+        list(terminate(range(1), seconds=3.0))
+
+        assert signal.getsignal(signal.SIGALRM) is handler
+    finally:
+        signal.signal(signal.SIGALRM, original_handler)
