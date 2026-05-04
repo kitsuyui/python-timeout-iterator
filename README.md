@@ -33,6 +33,8 @@ assert results == [0, 1, 2]
 ### terminate
 
 `terminate` is a generator that it will raise an exception after the timeout.
+This function uses `signal.SIGALRM` and `signal.setitimer()`, so it is only
+supported on Unix-like platforms that provide those signal APIs.
 
 ```python
 from timeout_iterator import terminate
