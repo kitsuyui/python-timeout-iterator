@@ -7,9 +7,13 @@ on:
   push:
     branches:
       - main
+
+permissions:
+  contents: read
+
 jobs:
   actionlint:
-    uses: kitsuyui/gh-actions-workflows/.github/workflows/actionlint.yml@main
+    uses: kitsuyui/gh-actions-workflows/.github/workflows/actionlint.yml@3717c78af3a5e594b7a81b063276e15fac7e08fc # main
   test:
     runs-on: ubuntu-latest
     strategy:
