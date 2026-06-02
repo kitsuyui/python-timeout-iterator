@@ -25,7 +25,7 @@ classifiers = [
 Homepage = "https://github.com/kitsuyui/python-timeout-iterator"
 
 [tool.setuptools]
-package-data = { "timeout_iterator" = ["py.typed"], "*" = ["README.md, LICENSE"] }
+package-data = { "timeout_iterator" = ["py.typed"], "*" = ["README.md", "LICENSE"] }
 package-dir = { "timeout_iterator" = "timeout_iterator" }
 
 [dependency-groups]
