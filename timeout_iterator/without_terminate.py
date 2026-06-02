@@ -8,11 +8,11 @@ T = TypeVar("T")
 # NOTE: float type accepts int
 # https://peps.python.org/pep-0484/#the-numeric-tower
 def without_terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
-    """Timeout iterator
+    """Timeout iterator that stops gracefully without raising TimeoutError.
 
-    This iterator times out after the specified number of seconds.
-    This iterator cannot forcibly terminate a running task.
-    It just ends without executing the next task.
+    Unlike `terminate`, this function does NOT raise TimeoutError when the
+    timeout expires. It simply stops yielding further items after the deadline.
+    Cannot forcibly interrupt a task that is running between yields.
     """
     now = datetime.datetime.now()
     end = now + datetime.timedelta(seconds=seconds)
