@@ -61,6 +61,12 @@ except TimeoutError:
 assert results == [0, 1, 2]
 ```
 
+**Signal scope**: `SIGALRM` is delivered at any Python bytecode boundary in
+the calling thread — not only during fetches from the upstream iterator.  The
+loop body itself can be interrupted and raise `TimeoutError`.  Keep loop body
+code safe to interrupt at any point, or use `without_terminate` if you need the
+upstream items to be fully consumed before yielding control.
+
 # LICENSE
 
 BSD 3-Clause License
