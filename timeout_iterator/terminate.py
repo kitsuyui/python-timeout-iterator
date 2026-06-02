@@ -1,4 +1,5 @@
 import signal
+import threading
 import time
 from collections.abc import Iterable, Iterator
 from typing import TypeVar
@@ -15,6 +16,15 @@ def _ensure_itimer_real_is_available() -> None:
 
     message = "terminate() cannot run while ITIMER_REAL is already active"
     raise RuntimeError(message)
+
+
+def _require_main_thread() -> None:
+    if threading.current_thread() is not threading.main_thread():
+        raise ValueError(
+            "terminate() must be called from the main thread; "
+            "signal.signal() and signal.setitimer() are main-thread-only "
+            "APIs. Use without_terminate() for thread-safe timeout iteration.",
+        )
 
 
 # NOTE: float type accepts int
@@ -37,6 +47,7 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     Keep loop body code interrupt-safe, or use ``without_terminate`` if the
     upstream must be fully consumed before yielding to the caller.
     """
+    _require_main_thread()
     _ensure_itimer_real_is_available()
     validate_timeout_seconds(seconds)
     start = time.monotonic()
