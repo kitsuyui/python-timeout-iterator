@@ -22,6 +22,9 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
 
     This iterator forcibly terminates a task after the timeout expires.
     It cannot be used while another ITIMER_REAL timer is active.
+
+    Must be called from the main thread of the main interpreter.
+    Calling from a worker thread raises ValueError.
     """
     _ensure_itimer_real_is_available()
     now = datetime.datetime.now()
@@ -39,10 +42,11 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
         )
 
     original_handler = signal.signal(signal.SIGALRM, handler)
-    signal.setitimer(signal.ITIMER_REAL, seconds)
-
     try:
-        yield from iterable
+        signal.setitimer(signal.ITIMER_REAL, seconds)
+        try:
+            yield from iterable
+        finally:
+            signal.setitimer(signal.ITIMER_REAL, 0)
     finally:
-        signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, original_handler)
