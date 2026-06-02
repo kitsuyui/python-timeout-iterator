@@ -1,6 +1,6 @@
 import datetime
 import signal
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from typing import TypeVar
 
 T = TypeVar("T")
@@ -8,7 +8,7 @@ T = TypeVar("T")
 
 # NOTE: float type accepts int
 # https://peps.python.org/pep-0484/#the-numeric-tower
-def terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
+def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     """Timeout iterator
 
     This iterator forcibly terminates a task after the timeout expires.
