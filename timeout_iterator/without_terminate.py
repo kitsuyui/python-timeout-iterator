@@ -1,4 +1,4 @@
-import datetime
+import time
 from collections.abc import Iterable
 from typing import TypeVar
 
@@ -14,9 +14,8 @@ def without_terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
     This iterator cannot forcibly terminate a running task.
     It just ends without executing the next task.
     """
-    now = datetime.datetime.now()
-    end = now + datetime.timedelta(seconds=seconds)
+    end = time.monotonic() + seconds
     for item in iterable:
-        if datetime.datetime.now() > end:
+        if time.monotonic() > end:
             break
         yield item

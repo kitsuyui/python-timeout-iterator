@@ -1,5 +1,5 @@
-import datetime
 import signal
+import time
 from collections.abc import Iterable
 from typing import TypeVar
 
@@ -13,11 +13,10 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterable[T]:
 
     This iterator forcibly terminates a task after the timeout expires.
     """
-    now = datetime.datetime.now()
-    end = now + datetime.timedelta(seconds=seconds)
+    end = time.monotonic() + seconds
 
     def handler(signum: int, _frame: object) -> None:
-        if signum != signal.SIGALRM or datetime.datetime.now() < end:
+        if signum != signal.SIGALRM or time.monotonic() < end:
             return
         raise TimeoutError
 
