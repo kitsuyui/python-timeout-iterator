@@ -49,6 +49,15 @@ def test_terminate_4() -> None:
     assert results == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
+def test_terminate_error_has_message() -> None:
+    # TimeoutError should include the configured limit in its message.
+    with pytest.raises(TimeoutError) as exc_info:
+        for _i in terminate(range(100), seconds=0.1):
+            time.sleep(0.05)
+    assert str(exc_info.value) != ""
+    assert "0.1s" in str(exc_info.value)
+
+
 def test_terminate_restores_sigalrm_handler() -> None:
     def handler(signum: int, _frame: object) -> None:
         raise AssertionError(f"unexpected signal: {signum}")
