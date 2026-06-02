@@ -3,6 +3,8 @@ import signal
 from collections.abc import Iterable, Iterator
 from typing import TypeVar
 
+from timeout_iterator._seconds import validate_timeout_seconds
+
 T = TypeVar("T")
 
 
@@ -22,8 +24,10 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
 
     This iterator forcibly terminates a task after the timeout expires.
     It cannot be used while another ITIMER_REAL timer is active.
+    The timeout must be a positive finite number of seconds.
     """
     _ensure_itimer_real_is_available()
+    validate_timeout_seconds(seconds)
     now = datetime.datetime.now()
     end = now + datetime.timedelta(seconds=seconds)
     fired = False
