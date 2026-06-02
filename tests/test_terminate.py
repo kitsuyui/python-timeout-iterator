@@ -1,5 +1,6 @@
 import signal
 import time
+from collections.abc import Callable
 
 import pytest
 
@@ -56,6 +57,30 @@ def test_terminate_error_has_message() -> None:
             time.sleep(0.05)
     assert str(exc_info.value) != ""
     assert "0.1s" in str(exc_info.value)
+
+
+def test_terminate_handler_not_reentrant(  # noqa: C901
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Capture terminate()'s SIGALRM handler and call it a second time to verify
+    # the fired flag makes re-entrant delivery a no-op.
+    captured: list[Callable[[int, object], None]] = []
+    real_fn = signal.signal
+
+    def spy(signum: int, h: signal.Handlers) -> signal.Handlers:
+        r = real_fn(signum, h)
+        if signum == signal.SIGALRM and callable(h):
+            captured.append(h)
+        return r  # type: ignore[return-value]
+
+    monkeypatch.setattr(signal, "signal", spy)
+    with pytest.raises(TimeoutError):
+        for _i in terminate(range(100), seconds=0.1):
+            time.sleep(0.05)
+
+    assert len(captured) == 1
+    # Without fired flag this would raise a second TimeoutError (end is past).
+    captured[0](signal.SIGALRM, None)
 
 
 def test_terminate_restores_sigalrm_handler() -> None:
