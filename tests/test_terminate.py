@@ -1,3 +1,4 @@
+import os
 import signal
 import time
 
@@ -28,23 +29,27 @@ def test_terminate_2() -> None:
 
 
 def test_terminate_3() -> None:
-    # Do not timeout if the sent signal is not SIGALRM
+    # Do not timeout if the sent signal is not SIGALRM.
+    # Use os.kill to actually deliver SIGWINCH (not signal.alarm, which
+    # schedules SIGALRM after N seconds using the signal number as a duration).
     results = []
     for i in terminate(range(10), seconds=3.0):
         results.append(i)
         time.sleep(0.1)
-        signal.alarm(signal.SIGWINCH)
+        os.kill(os.getpid(), signal.SIGWINCH)
 
     assert results == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 def test_terminate_4() -> None:
-    # Do not timeout if the signal sent but the time is longer than the timeout
+    # Do not timeout if SIGALRM fires but the deadline has not been reached.
+    # Use os.kill to actually deliver SIGALRM, exercising the
+    # `datetime.datetime.now() < end` guard in the handler.
     results = []
     for i in terminate(range(10), seconds=3.0):
         results.append(i)
         time.sleep(0.1)
-        signal.alarm(signal.SIGALRM)
+        os.kill(os.getpid(), signal.SIGALRM)
 
     assert results == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
