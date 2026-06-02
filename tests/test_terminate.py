@@ -1,5 +1,6 @@
 import os
 import signal
+import threading
 import time
 from collections.abc import Callable
 from unittest.mock import patch
@@ -87,6 +88,24 @@ def test_terminate_handler_not_reentrant(  # noqa: C901
     assert len(captured) == 1
     # Without fired flag this would raise a second TimeoutError (end is past).
     captured[0](signal.SIGALRM, None)
+
+
+def test_terminate_raises_from_worker_thread() -> None:
+    # terminate() must raise ValueError when called from a non-main thread.
+    error: list[Exception] = []
+
+    def worker() -> None:
+        try:
+            list(terminate(range(5), seconds=1.0))
+        except ValueError as e:
+            error.append(e)
+
+    t = threading.Thread(target=worker)
+    t.start()
+    t.join()
+
+    assert len(error) == 1
+    assert "main thread" in str(error[0])
 
 
 def test_terminate_restores_sigalrm_handler() -> None:

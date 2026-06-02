@@ -61,6 +61,12 @@ except TimeoutError:
 assert results == [0, 1, 2]
 ```
 
+**Main-thread only**: `signal.signal()` and `signal.setitimer()` are
+main-thread APIs in CPython.  Calling `terminate()` from a worker thread
+(e.g. inside `threading.Thread` or `concurrent.futures.ThreadPoolExecutor`)
+raises `ValueError` immediately.  Use `without_terminate()` for thread-safe
+timeout iteration.
+
 **Signal scope**: `SIGALRM` is delivered at any Python bytecode boundary in
 the calling thread — not only during fetches from the upstream iterator.  The
 loop body itself can be interrupted and raise `TimeoutError`.  Keep loop body
