@@ -46,6 +46,12 @@ SIGALRM fires.
 This function uses `signal.SIGALRM` and `signal.setitimer()`, so it is only
 supported on Unix-like platforms that provide those signal APIs.
 
+**Signal interaction**: `terminate` installs a `SIGALRM` handler for its
+duration. Any `SIGALRM` that arrives before the timeout elapses is silently
+discarded — the previous handler is not called for those signals. Libraries or
+code that also use `signal.alarm()` / `signal.setitimer()` will have their
+signals suppressed until the iterator exits.
+
 ```python
 import time
 
