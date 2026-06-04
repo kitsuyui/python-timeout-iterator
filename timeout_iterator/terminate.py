@@ -26,10 +26,13 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     _ensure_itimer_real_is_available()
     now = datetime.datetime.now()
     end = now + datetime.timedelta(seconds=seconds)
+    fired = False
 
     def handler(signum: int, _frame: object) -> None:
-        if signum != signal.SIGALRM or datetime.datetime.now() < end:
+        nonlocal fired
+        if fired or signum != signal.SIGALRM or datetime.datetime.now() < end:
             return
+        fired = True
         elapsed = (datetime.datetime.now() - now).total_seconds()
         raise TimeoutError(
             f"timed out after {elapsed:.3f}s (limit: {seconds}s)",
