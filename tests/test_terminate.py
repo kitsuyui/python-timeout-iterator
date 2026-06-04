@@ -66,3 +66,20 @@ def test_terminate_restores_sigalrm_handler() -> None:
         assert signal.getsignal(signal.SIGALRM) is handler
     finally:
         signal.signal(signal.SIGALRM, original_handler)
+
+
+def test_nested_terminate_fails_fast_without_leaking_timer() -> None:
+    original_handler = signal.getsignal(signal.SIGALRM)
+    original_timer = signal.getitimer(signal.ITIMER_REAL)
+    try:
+        with pytest.raises(
+            RuntimeError,
+            match="ITIMER_REAL is already active",
+        ):
+            list(terminate(terminate(range(1), seconds=1.0), seconds=3.0))
+
+        assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0)
+        assert signal.getsignal(signal.SIGALRM) is original_handler
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, *original_timer)
+        signal.signal(signal.SIGALRM, original_handler)
