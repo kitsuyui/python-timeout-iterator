@@ -21,6 +21,8 @@ $ pip install timeout-iterator
 but it will not raise an exception.
 
 ```python
+import time
+
 from timeout_iterator import without_terminate
 results = []
 for i in without_terminate(range(10), seconds=0.3):
@@ -37,6 +39,8 @@ This function uses `signal.SIGALRM` and `signal.setitimer()`, so it is only
 supported on Unix-like platforms that provide those signal APIs.
 
 ```python
+import time
+
 from timeout_iterator import terminate
 try:
     results = []

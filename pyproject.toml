@@ -19,13 +19,15 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries",
+    "Operating System :: POSIX",
+    "Operating System :: MacOS",
 ]
 
 [project.urls]
 Homepage = "https://github.com/kitsuyui/python-timeout-iterator"
 
 [tool.setuptools]
-package-data = { "timeout_iterator" = ["py.typed"], "*" = ["README.md, LICENSE"] }
+package-data = { "timeout_iterator" = ["py.typed"], "*" = ["README.md", "LICENSE"] }
 package-dir = { "timeout_iterator" = "timeout_iterator" }
 
 [dependency-groups]
