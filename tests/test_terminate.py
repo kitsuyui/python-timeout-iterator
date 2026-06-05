@@ -2,6 +2,7 @@ import os
 import signal
 import time
 from collections.abc import Callable
+from unittest.mock import patch
 
 import pytest
 
@@ -136,4 +137,26 @@ def test_terminate_rejects_invalid_seconds_without_signal_changes(
         assert signal.getitimer(signal.ITIMER_REAL) == original_timer
     finally:
         signal.setitimer(signal.ITIMER_REAL, *original_timer)
+        signal.signal(signal.SIGALRM, original_handler)
+
+
+def test_terminate_restores_sigalrm_handler_on_setitimer_error() -> None:
+    # Even when setitimer raises, the SIGALRM handler must be restored.
+    def sentinel(signum: int, _frame: object) -> None:
+        pass
+
+    original_handler = signal.getsignal(signal.SIGALRM)
+    signal.signal(signal.SIGALRM, sentinel)
+    try:
+        with (
+            patch(
+                "signal.setitimer",
+                side_effect=[OSError("mock error"), None],
+            ),
+            pytest.raises(OSError),
+        ):
+            list(terminate(range(1), seconds=1.0))
+
+        assert signal.getsignal(signal.SIGALRM) is sentinel
+    finally:
         signal.signal(signal.SIGALRM, original_handler)
