@@ -18,9 +18,10 @@ def _ensure_itimer_real_is_available() -> None:
 # NOTE: float type accepts int
 # https://peps.python.org/pep-0484/#the-numeric-tower
 def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
-    """Timeout iterator
+    """Timeout iterator that raises TimeoutError when the timeout expires.
 
-    This iterator forcibly terminates a task after the timeout expires.
+    Unlike `without_terminate`, this function forcibly raises TimeoutError
+    after the specified number of seconds, even mid-iteration.
     It cannot be used while another ITIMER_REAL timer is active.
     """
     _ensure_itimer_real_is_available()
