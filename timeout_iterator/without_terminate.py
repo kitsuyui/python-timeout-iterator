@@ -1,8 +1,21 @@
 import datetime
 from collections.abc import Iterable, Iterator
-from typing import TypeVar
+from typing import Protocol, TypeGuard, TypeVar
 
 T = TypeVar("T")
+
+
+class _Closeable(Protocol):
+    def close(self) -> None: ...
+
+
+def _is_closeable(value: object) -> TypeGuard[_Closeable]:
+    return callable(getattr(value, "close", None))
+
+
+def _close_if_possible(value: object) -> None:
+    if _is_closeable(value):
+        value.close()
 
 
 # NOTE: float type accepts int
@@ -16,7 +29,9 @@ def without_terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     """
     now = datetime.datetime.now()
     end = now + datetime.timedelta(seconds=seconds)
-    for item in iterable:
+    iterator = iter(iterable)
+    for item in iterator:
         if datetime.datetime.now() > end:
+            _close_if_possible(iterator)
             break
         yield item
