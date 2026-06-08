@@ -1,5 +1,5 @@
-import datetime
 import signal
+import time
 from collections.abc import Iterable, Iterator
 from typing import TypeVar
 
@@ -35,16 +35,16 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     upstream must be fully consumed before yielding to the caller.
     """
     _ensure_itimer_real_is_available()
-    now = datetime.datetime.now()
-    end = now + datetime.timedelta(seconds=seconds)
+    start = time.monotonic()
+    end = start + seconds
     fired = False
 
     def handler(signum: int, _frame: object) -> None:
         nonlocal fired
-        if fired or signum != signal.SIGALRM or datetime.datetime.now() < end:
+        if fired or signum != signal.SIGALRM or time.monotonic() < end:
             return
         fired = True
-        elapsed = (datetime.datetime.now() - now).total_seconds()
+        elapsed = time.monotonic() - start
         raise TimeoutError(
             f"timed out after {elapsed:.3f}s (limit: {seconds}s)",
         )

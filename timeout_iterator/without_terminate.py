@@ -1,4 +1,4 @@
-import datetime
+import time
 from collections.abc import Iterable, Iterator
 from typing import Protocol, TypeGuard, TypeVar
 
@@ -37,11 +37,10 @@ def without_terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     The trade-off is that it cannot forcibly interrupt a blocking upstream
     fetch or a task that is running between yields.
     """
-    now = datetime.datetime.now()
-    end = now + datetime.timedelta(seconds=seconds)
+    end = time.monotonic() + seconds
     iterator = iter(iterable)
     for item in iterator:
-        if datetime.datetime.now() > end:
+        if time.monotonic() > end:
             _close_if_possible(iterator)
             break
         yield item
