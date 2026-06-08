@@ -21,11 +21,18 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     """Timeout iterator that raises TimeoutError when the timeout expires.
 
     Unlike `without_terminate`, this function forcibly raises TimeoutError
-    after the specified number of seconds, even mid-iteration.
+    after the specified number of seconds, even mid-iteration. It uses
+    ``signal.SIGALRM`` / ``signal.setitimer()`` and is Unix-only.
     It cannot be used while another ITIMER_REAL timer is active.
 
     Must be called from the main thread of the main interpreter.
     Calling from a worker thread raises ValueError.
+
+    **Signal scope**: SIGALRM fires at any Python bytecode boundary in the
+    calling thread, not only during fetches from the upstream iterable.
+    The ``for`` loop body can also be interrupted and raise ``TimeoutError``.
+    Keep loop body code interrupt-safe, or use ``without_terminate`` if the
+    upstream must be fully consumed before yielding to the caller.
     """
     _ensure_itimer_real_is_available()
     now = datetime.datetime.now()
