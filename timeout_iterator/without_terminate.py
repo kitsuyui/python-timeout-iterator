@@ -21,7 +21,7 @@ def _close_if_possible(value: object) -> None:
 # NOTE: float type accepts int
 # https://peps.python.org/pep-0484/#the-numeric-tower
 def without_terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
-    """Timeout iterator that stops gracefully without raising TimeoutError.
+    """Timeout iterator that stops yielding items once the deadline elapses.
 
     Unlike `terminate`, this function does NOT raise TimeoutError when the
     timeout expires and does not use signals, so it is safe to use in
