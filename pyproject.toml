@@ -57,7 +57,7 @@ local_scheme = "no-local-version"
 
 [tool.poe.tasks]
 test = "pytest"
-coverage-xml = "pytest --cov=timeout_iterator --doctest-modules --cov-report=xml"
+coverage-xml = "pytest --cov=timeout_iterator --doctest-modules --cov-report=xml --cov-fail-under=100"
 format = "ruff format timeout_iterator tests"
 check = [
     { cmd = "ruff check timeout_iterator tests" },
