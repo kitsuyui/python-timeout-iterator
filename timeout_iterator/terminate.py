@@ -1,5 +1,5 @@
-import datetime
 import signal
+import time
 from collections.abc import Iterable, Iterator
 from typing import TypeVar
 
@@ -23,25 +23,32 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     """Timeout iterator that raises TimeoutError when the timeout expires.
 
     Unlike `without_terminate`, this function forcibly raises TimeoutError
-    after the specified number of seconds, even mid-iteration.
+    after the specified number of seconds, even mid-iteration. It uses
+    ``signal.SIGALRM`` / ``signal.setitimer()`` and is Unix-only.
     It cannot be used while another ITIMER_REAL timer is active.
     The timeout must be a positive finite number of seconds.
 
     Must be called from the main thread of the main interpreter.
     Calling from a worker thread raises ValueError.
+
+    **Signal scope**: SIGALRM fires at any Python bytecode boundary in the
+    calling thread, not only during fetches from the upstream iterable.
+    The ``for`` loop body can also be interrupted and raise ``TimeoutError``.
+    Keep loop body code interrupt-safe, or use ``without_terminate`` if the
+    upstream must be fully consumed before yielding to the caller.
     """
     _ensure_itimer_real_is_available()
     validate_timeout_seconds(seconds)
-    now = datetime.datetime.now()
-    end = now + datetime.timedelta(seconds=seconds)
+    start = time.monotonic()
+    end = start + seconds
     fired = False
 
     def handler(signum: int, _frame: object) -> None:
         nonlocal fired
-        if fired or signum != signal.SIGALRM or datetime.datetime.now() < end:
+        if fired or signum != signal.SIGALRM or time.monotonic() < end:
             return
         fired = True
-        elapsed = (datetime.datetime.now() - now).total_seconds()
+        elapsed = time.monotonic() - start
         raise TimeoutError(
             f"timed out after {elapsed:.3f}s (limit: {seconds}s)",
         )

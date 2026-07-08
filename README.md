@@ -17,8 +17,9 @@ $ pip install timeout-iterator
 
 ### without_terminate
 
-`without_terminate` is a generator that it will not yield after the timeout,
-but it will not raise an exception.
+`without_terminate` stops yielding items once the timeout elapses without
+raising an exception. It is safe to use on all platforms because it does not
+use signals.
 
 ```python
 import time
@@ -31,6 +32,13 @@ for i in without_terminate(range(10), seconds=0.3):
 
 assert results == [0, 1, 2]
 ```
+
+**Boundary behavior**: The timeout is checked *after* each item is fetched
+from the upstream iterator. If the deadline passes between a fetch and its
+yield, the fetched item is silently dropped. At most one item near the
+boundary may be consumed from the upstream but not passed to the caller.
+This differs from `terminate`, which delivers every item fetched before the
+SIGALRM fires.
 
 ### terminate
 
@@ -52,6 +60,40 @@ except TimeoutError:
 
 assert results == [0, 1, 2]
 ```
+
+**Signal scope**: `SIGALRM` is delivered at any Python bytecode boundary in
+the calling thread — not only during fetches from the upstream iterator.  The
+loop body itself can be interrupted and raise `TimeoutError`.  Keep loop body
+code safe to interrupt at any point, or use `without_terminate` if you need the
+upstream items to be fully consumed before yielding control.
+
+## Development
+
+This repository uses [lefthook](https://lefthook.dev/) to run the same checks as CI
+locally, so problems surface before they reach CI.
+
+```sh
+# Install dependencies
+uv sync
+
+# Install the Git hooks (once; requires lefthook on your PATH)
+lefthook install
+```
+
+Once installed, the hooks run automatically:
+
+- **pre-commit**: `uv run poe check`
+- **pre-push**: `uv run poe check` and `uv run poe test`
+
+You can also run the checks manually:
+
+```sh
+uv run poe check
+uv run poe test
+```
+
+CI still runs the full matrix (see `.github/workflows/`); the hooks only bring that
+feedback earlier on your machine.
 
 # LICENSE
 

@@ -1,4 +1,4 @@
-import datetime
+import time
 from collections.abc import Iterable, Iterator
 from typing import Protocol, TypeGuard, TypeVar
 
@@ -23,19 +23,27 @@ def _close_if_possible(value: object) -> None:
 # NOTE: float type accepts int
 # https://peps.python.org/pep-0484/#the-numeric-tower
 def without_terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
-    """Timeout iterator that stops gracefully without raising TimeoutError.
+    """Timeout iterator that stops yielding items once the deadline elapses.
 
     Unlike `terminate`, this function does NOT raise TimeoutError when the
-    timeout expires. It simply stops yielding further items after the deadline.
-    Cannot forcibly interrupt a task that is running between yields.
-    The timeout must be a positive finite number of seconds.
+    timeout expires and does not use signals, so it is safe to use in
+    environments that restrict SIGALRM. It simply stops yielding further
+    items after the deadline.
+
+    The timeout is checked *after* each item is fetched from the upstream
+    iterator, not before. This means that if the deadline expires while a
+    fetch is in progress (or just after one completes), the fetched item is
+    silently dropped — consumed from the upstream but not yielded to the
+    caller. At most one item may be lost this way at the boundary.
+
+    The trade-off is that it cannot forcibly interrupt a blocking upstream
+    fetch or a task that is running between yields.
     """
     validate_timeout_seconds(seconds)
-    now = datetime.datetime.now()
-    end = now + datetime.timedelta(seconds=seconds)
+    end = time.monotonic() + seconds
     iterator = iter(iterable)
     for item in iterator:
-        if datetime.datetime.now() > end:
+        if time.monotonic() > end:
             _close_if_possible(iterator)
             break
         yield item
