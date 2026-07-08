@@ -1,6 +1,8 @@
 import time
 from collections.abc import Iterator
 
+import pytest
+
 from timeout_iterator import without_terminate
 
 
@@ -22,6 +24,15 @@ def test_without_terminate_2() -> None:
         time.sleep(0.1)
 
     assert results == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [0, -0.1, float("inf"), float("-inf"), float("nan")],
+)
+def test_without_terminate_rejects_invalid_seconds(seconds: float) -> None:
+    with pytest.raises(ValueError, match="positive finite"):
+        list(without_terminate(range(1), seconds=seconds))
 
 
 class CloseableIterator(Iterator[int]):

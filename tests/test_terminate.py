@@ -120,6 +120,26 @@ def test_nested_terminate_fails_fast_without_leaking_timer() -> None:
         signal.signal(signal.SIGALRM, original_handler)
 
 
+@pytest.mark.parametrize(
+    "seconds",
+    [0, -0.1, float("inf"), float("-inf"), float("nan")],
+)
+def test_terminate_rejects_invalid_seconds_without_signal_changes(
+    seconds: float,
+) -> None:
+    original_handler = signal.getsignal(signal.SIGALRM)
+    original_timer = signal.getitimer(signal.ITIMER_REAL)
+    try:
+        with pytest.raises(ValueError, match="positive finite"):
+            list(terminate(range(1), seconds=seconds))
+
+        assert signal.getsignal(signal.SIGALRM) == original_handler
+        assert signal.getitimer(signal.ITIMER_REAL) == original_timer
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, *original_timer)
+        signal.signal(signal.SIGALRM, original_handler)
+
+
 def test_terminate_restores_sigalrm_handler_on_setitimer_error() -> None:
     # Even when setitimer raises, the SIGALRM handler must be restored.
     def sentinel(signum: int, _frame: object) -> None:

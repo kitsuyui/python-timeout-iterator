@@ -3,6 +3,8 @@ import time
 from collections.abc import Iterable, Iterator
 from typing import TypeVar
 
+from timeout_iterator._seconds import validate_timeout_seconds
+
 T = TypeVar("T")
 
 
@@ -24,6 +26,7 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     after the specified number of seconds, even mid-iteration. It uses
     ``signal.SIGALRM`` / ``signal.setitimer()`` and is Unix-only.
     It cannot be used while another ITIMER_REAL timer is active.
+    The timeout must be a positive finite number of seconds.
 
     Must be called from the main thread of the main interpreter.
     Calling from a worker thread raises ValueError.
@@ -35,6 +38,7 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     upstream must be fully consumed before yielding to the caller.
     """
     _ensure_itimer_real_is_available()
+    validate_timeout_seconds(seconds)
     start = time.monotonic()
     end = start + seconds
     fired = False

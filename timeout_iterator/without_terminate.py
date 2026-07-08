@@ -2,6 +2,8 @@ import time
 from collections.abc import Iterable, Iterator
 from typing import Protocol, TypeGuard, TypeVar
 
+from timeout_iterator._seconds import validate_timeout_seconds
+
 T = TypeVar("T")
 
 
@@ -37,6 +39,7 @@ def without_terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     The trade-off is that it cannot forcibly interrupt a blocking upstream
     fetch or a task that is running between yields.
     """
+    validate_timeout_seconds(seconds)
     end = time.monotonic() + seconds
     iterator = iter(iterable)
     for item in iterator:
