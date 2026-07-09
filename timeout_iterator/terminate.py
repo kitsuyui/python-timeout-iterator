@@ -36,6 +36,10 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     The ``for`` loop body can also be interrupted and raise ``TimeoutError``.
     Keep loop body code interrupt-safe, or use ``without_terminate`` if the
     upstream must be fully consumed before yielding to the caller.
+
+    The timeout is measured using ``time.monotonic()``, so it counts
+    monotonic elapsed time and is unaffected by DST transitions or
+    wall-clock adjustments.
     """
     _ensure_itimer_real_is_available()
     validate_timeout_seconds(seconds)
