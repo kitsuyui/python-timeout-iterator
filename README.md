@@ -61,12 +61,17 @@ except TimeoutError:
 assert results == [0, 1, 2]
 ```
 
+**Main-thread only**: `signal.signal()` and `signal.setitimer()` are
+main-thread APIs in CPython.  Calling `terminate()` from a worker thread
+(e.g. inside `threading.Thread` or `concurrent.futures.ThreadPoolExecutor`)
+raises `ValueError` immediately.  Use `without_terminate()` for thread-safe
+timeout iteration.
+
 **Signal scope**: `SIGALRM` is delivered at any Python bytecode boundary in
 the calling thread — not only during fetches from the upstream iterator.  The
 loop body itself can be interrupted and raise `TimeoutError`.  Keep loop body
 code safe to interrupt at any point, or use `without_terminate` if you need the
 upstream items to be fully consumed before yielding control.
-
 ## Development
 
 This repository uses [lefthook](https://lefthook.dev/) to run the same checks as CI
@@ -94,7 +99,6 @@ uv run poe test
 
 CI still runs the full matrix (see `.github/workflows/`); the hooks only bring that
 feedback earlier on your machine.
-
 # LICENSE
 
 BSD 3-Clause License
