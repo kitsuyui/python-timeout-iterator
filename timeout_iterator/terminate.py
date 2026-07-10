@@ -38,6 +38,13 @@ def terminate(iterable: Iterable[T], seconds: float) -> Iterator[T]:
     It cannot be used while another ITIMER_REAL timer is active.
     The timeout must be a positive finite number of seconds.
 
+    Caution: ``terminate`` installs a SIGALRM handler for its duration.
+    Any SIGALRM that arrives before the timeout elapses is silently
+    discarded; the previous handler is *not* called for those signals.
+    This means code running concurrently inside the iterator — or
+    libraries that also use ``signal.alarm()`` / ``signal.setitimer()``
+    — will have their signals suppressed until the iterator exits.
+
     Must be called from the main thread of the main interpreter.
     Calling from a worker thread raises ValueError.
 
