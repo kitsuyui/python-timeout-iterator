@@ -34,6 +34,7 @@ package-dir = { "timeout_iterator" = "timeout_iterator" }
 dev = [
     "pytest",
     "pytest-cov",
+    "setuptools>=84.1.0",
     "poethepoet",
     "setuptools-scm",
     "ruff",
